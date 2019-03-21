@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<!--
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ -->
+
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" 
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" 
+        crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div id="signedOut">
+    <center>
+    <h1>Get Started with the CptS 489 OAuth 2 Demo App</h1>
+    <br>
+    <h3>Please sign in to your GitHub account to continue.</h3>
+    <button id="signInBtn" class="btn btn-primary btn-lg" style="width:70%; font-size: 36px">Sign In with GitHub</button>
+    </center>
+  </div>
+  <div id="signedIn">
+    <center>
+    <h1>You are Signed in to the CptS 489 OAuth 2 Demo App</h1>
+    <br>
+    <h3 id=username></h3>
+    <button id="signOutBtn" class="btn btn-primary" style="width:70%; font-size: 36px">Sign Out</button>
+    </center>
+  </div>
+
+  <script>
+    var email = '<?= email ?>';
+    var gitUserName = '<?= gitUserName ?>';
+    var isSignedIn = '<?= isSignedIn ?>' === 'true';
+
+    //document READY: Display the signed in or signed out div based on whether we're signed in.
+    $(document).ready(function() {
+      if (!isSignedIn) {
+        $("#signedIn").hide();
+      } else {
+        $("#signedOut").hide();
+        $("#username").html("Welcome, " + gitUserName + "!");
+      }
+    });
+
+    //signInBtn CLICK -- Initiate Oauth2 authentication through GitHub. Callback will actually make call.
+    $("#signInBtn").click(function() {
+      $(this).html("<i class='fa fa-spin fa-spinner'></i>&nbsp;Please wait..."); //start spinner
+      google.script.run
+        .withSuccessHandler(openGHAuthUrlCallback)
+        .getAuthorizationUrl();
+    });
+
+    //signOutBtn -- Initiate Oauth2 reset through GitHub. Callback will show signout
+    $("#signOutBtn").click(function() {
+      $(this).html("<i class='fa fa-spin fa-spinner'></i>&nbsp;Please wait..."); //start spinner
+      google.script.run
+        .withSuccessHandler(signOutCallback)
+        .signOut();
+    });
+
+    //openGHAuthUrlCallback -- Given url, open GitHub's authorization window, replacing the current window
+    function openGHAuthUrlCallback(url) {
+      window.open(url,"_top");
+    }
+
+    //signOutCallback -- User signed out, so update UI accordingly
+    function signOutCallback() {
+      $("#signedIn").hide();
+      $("#signedOut").show();
+    }
+    
+  </script>
+  
+</body>
+</html>
